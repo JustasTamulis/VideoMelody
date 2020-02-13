@@ -14,43 +14,39 @@ import PIL
 from tensorflow.keras import layers
 import time
 from IPython import display
-
-tf.compat.v1.enable_eager_execution()
+import random
+tf.enable_eager_execution()
 
 
 def make_generator_model():
     model = tf.keras.Sequential()
-    model.add(layers.Dense(3*5*3*5*8*3, use_bias=False, input_shape=(100,)))
+    model.add(layers.Dense(5*5*4*3*3, use_bias=False, input_shape=(100,)))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
-    model.add(layers.Reshape((45, 60, 2)))
-    # assert model.output_shape == (None, 45, 60, 8) # Note: None is the batch size
+    model.add(layers.Reshape((15, 20, 3)))
 
-    model.add(layers.Conv2DTranspose(32, (10, 10), strides=(2, 2), padding='same', use_bias=False))
-    # assert model.output_shape == (None, 7, 7, 128)
+    model.add(layers.Conv2DTranspose(27, (2, 2), strides=(2, 2), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
-    model.add(layers.Conv2DTranspose(16, (5, 5), strides=(2, 2), padding='same', use_bias=False))
-    # assert model.output_shape == (None, 14, 14, 64)
+    model.add(layers.Conv2DTranspose(18, (5, 5), strides=(3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
-    model.add(layers.Conv2DTranspose(3, (5, 5), strides=(2, 2), padding='same', use_bias=False, activation='tanh'))
-    # assert model.output_shape == (None, 28, 28, 1)
+    model.add(layers.Conv2DTranspose(3, (5, 5), strides=(4, 4), padding='same', use_bias=False, activation='tanh'))
 
     return model
 
 
 def make_discriminator_model():
     model = tf.keras.Sequential()
-    model.add(layers.Conv2D(28, (10, 10), strides=(4, 4), padding='same',
+    model.add(layers.Conv2D(27, (10, 10), strides=(4, 4), padding='same',
                                      input_shape=[360, 480, 3]))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv2D(64, (5, 5), strides=(8, 8), padding='same'))
+    model.add(layers.Conv2D(9, (5, 5), strides=(8, 8), padding='same'))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
@@ -93,7 +89,7 @@ def train_step(images):
 def train(dataset, epochs):
     for epoch in range(epochs):
         start = time.time()
-
+        # print("epoch  " + str(epoch))
         for image_batch in dataset:
             train_step(image_batch)
 
@@ -101,8 +97,8 @@ def train(dataset, epochs):
         display.clear_output(wait=True)
         generate_and_save_images(generator, epoch + 1, seed)
 
-        # Save the model every 15 epochs
-        if (epoch + 1) % 15 == 0:
+        # Save the model every 5 epochs
+        if (epoch + 1) % 20 == 0:
           checkpoint.save(file_prefix = checkpoint_prefix)
 
         print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
@@ -116,14 +112,17 @@ def generate_and_save_images(model, epoch, test_input):
   # This is so all layers run in inference mode (batchnorm).
   predictions = model(test_input, training=False)
 
-  fig = plt.figure(figsize=(4,4))
+  # fig = plt.figure(figsize=(1,1))
+  # img = None
+  # for i in range(predictions.shape[0]):
+  #     plt.subplot(1, 1, i+1)
+  img = np.array((predictions[0, :, :, :] *127.5 + 127.5) / 255.0)
+  plt.imshow(img)
+  plt.axis('off')
 
-  for i in range(predictions.shape[0]):
-      plt.subplot(4, 4, i+1)
-      plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap='gray')
-      plt.axis('off')
+  print("maximum " + str(np.amax(img)) + ", minimum " + str(np.amin(img)))
+  plt.savefig('./test3/image_one_{:04d}.png'.format(epoch))
 
-  plt.savefig('image_{:04d}.png'.format(epoch))
 
 def getVideo(name):
     cap = cv2.VideoCapture(name)
@@ -145,12 +144,13 @@ video = getVideo(video_name)
 FRAMES = video.shape[0]
 IMG_HEIGHT = 360
 IMG_WIDTH = 480
-# print(FRAMES)
-video = video.reshape(FRAMES, IMG_HEIGHT, IMG_WIDTH, 3).astype('float32')
-video = (video - 127.5) / 127.5
+print(FRAMES)
 
+video = video.reshape(FRAMES, IMG_HEIGHT, IMG_WIDTH, 3).astype('float32')
+video = video[:1024,:,:,:]
+video = (video - 127.5) / 127.5
 BUFFER_SIZE = FRAMES
-BATCH_SIZE = 256
+BATCH_SIZE = 64
 # Batch and shuffle the data
 train_dataset = tf.data.Dataset.from_tensor_slices(video).shuffle(BUFFER_SIZE).batch(BATCH_SIZE, drop_remainder=True)
 # print(train_dataset)
@@ -161,14 +161,20 @@ print(generator.summary())
 print(discriminator.summary())
 # noise = tf.random.normal([1, 100])
 # generated_image = generator(noise, training=False)
-#
-# print(type(generated_image))
-# print(generated_image.shape)
-# gen = generated_image[0, :, :, :] * 255
-# print(gen.shape)
+# img = np.array(((generated_image[0, :, :, :] *127.5 + 127.5) / 255.0))
+# print("maximum " + str(np.amax(img)))
+# print("minimum " + str(np.amin(img)))
+# plt.imshow(img)
+# plt.savefig('image_good.png')
+# plt.show()
+# #
+# #
+# # print(type(generated_image))
+# # print(generated_image.shape)
+# gen = (generated_image[0, :, :, :] + 1) / 2
+# print(gen)
 # plt.imshow((gen))
 # plt.show()
-
 #
 # This method returns a helper function to compute cross entropy loss
 cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
@@ -176,20 +182,44 @@ cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 generator_optimizer = tf.keras.optimizers.Adam(1e-4)
 discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
 
-checkpoint_dir = './training_checkpoints2'
+checkpoint_dir = './test3/training_checkpoints2'
 checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
 checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                  discriminator_optimizer=discriminator_optimizer,
                                  generator=generator,
                                  discriminator=discriminator)
 
-EPOCHS = 16
+EPOCHS = 100
 noise_dim = 100
-num_examples_to_generate = 16
+num_examples_to_generate = 1
 seed = tf.random.normal([num_examples_to_generate, noise_dim])
 
+checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
 
-train(train_dataset, EPOCHS)
+
+
+img = None
+noise = tf.random.normal([1, 100])
+for i in range(1000):
+    noise = tf.random.normal([1, 100]) * 0.1 + noise
+    # for x in range(100):
+    #     if random.randint(0, 10) == 10:
+    #         noise[x] = random.uniform(0, 1)
+    generated_image = generator(noise, training=False)
+    imag = np.array(((generated_image[0, :, :, :] *127.5 + 127.5) / 255.0))
+    # print("maximum " + str(np.amax(imag)))
+    # print("minimum " + str(np.amin(imag)))
+
+    if img is None:
+        img = plt.imshow(imag)
+    else:
+        img.set_data(imag)
+    plt.pause(.1)
+    plt.draw()
+
+
+
+# train(train_dataset, EPOCHS)
 
 
 
