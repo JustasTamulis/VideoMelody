@@ -1,0 +1,30 @@
+2020-04-17 13:31:53,708 DEBUG   MainThread:10284 [wandb_config.py:_load_defaults():122] no defaults not found in config-defaults.yaml
+2020-04-17 13:31:53,724 DEBUG   MainThread:10284 [git_repo.py:repo():30] git repository is invalid
+2020-04-17 13:31:54,525 DEBUG   MainThread:10284 [meta.py:setup():97] code probe starting
+2020-04-17 13:31:54,525 DEBUG   MainThread:10284 [meta.py:setup():101] non time limited probe of code
+2020-04-17 13:31:54,525 DEBUG   MainThread:10284 [meta.py:_setup_code_program():58] save program starting
+2020-04-17 13:31:54,525 DEBUG   MainThread:10284 [meta.py:_setup_code_program():60] save program starting: C:\Program Files\Python36\Scripts\wandb.exe\__main__.py
+2020-04-17 13:31:54,525 DEBUG   MainThread:10284 [meta.py:setup():119] code probe done
+2020-04-17 13:31:54,534 DEBUG   MainThread:10284 [run_manager.py:__init__():545] Initialized sync for None/1mi4l87p
+2020-04-17 13:31:54,732 INFO    Thread-7  :10284 [run_manager.py:_on_file_created():681] file/dir created: F:\CompSci\project\Code\MIDI\wandb\run-20200417_103153-1mi4l87p\wandb-metadata.json
+2020-04-17 13:31:55,141 INFO    MainThread:10284 [run_manager.py:init_run():928] system metrics and metadata threads started
+2020-04-17 13:31:55,141 INFO    MainThread:10284 [run_manager.py:init_run():967] upserting run before process can begin, waiting at most 10 seconds
+2020-04-17 13:31:55,418 INFO    Thread-11 :10284 [run_manager.py:_upsert_run():1052] saving patches
+2020-04-17 13:31:55,418 INFO    Thread-11 :10284 [run_manager.py:_upsert_run():1056] saving pip packages
+2020-04-17 13:31:55,419 INFO    Thread-11 :10284 [run_manager.py:_upsert_run():1058] initializing streaming files api
+2020-04-17 13:31:55,421 INFO    Thread-11 :10284 [run_manager.py:_upsert_run():1065] unblocking file change observer, beginning sync with W&B servers
+2020-04-17 13:31:55,435 INFO    MainThread:10284 [run_manager.py:_sync_etc():1272] entering loop for messages from user process
+2020-04-17 13:31:55,728 INFO    Thread-7  :10284 [run_manager.py:_on_file_created():681] file/dir created: F:\CompSci\project\Code\MIDI\wandb\run-20200417_103153-1mi4l87p\requirements.txt
+2020-04-17 13:31:55,728 INFO    Thread-7  :10284 [run_manager.py:_on_file_created():681] file/dir created: F:\CompSci\project\Code\MIDI\wandb\run-20200417_103153-1mi4l87p\output.log
+2020-04-17 13:31:57,731 INFO    Thread-7  :10284 [run_manager.py:_on_file_created():681] file/dir created: F:\CompSci\project\Code\MIDI\wandb\run-20200417_103153-1mi4l87p\config.yaml
+2020-04-17 13:31:57,990 INFO    Thread-7  :10284 [run_manager.py:_on_file_created():681] file/dir created: F:\CompSci\project\Code\MIDI\wandb\run-20200417_103153-1mi4l87p\wandb-history.jsonl
+2020-04-17 13:31:58,437 INFO    MainThread:10284 [run_manager.py:_sync_etc():1381] closing log streams and sending exitcode to W&B
+2020-04-17 13:31:58,438 INFO    MainThread:10284 [run_manager.py:shutdown():1072] shutting down system stats and metadata service
+2020-04-17 13:31:58,732 INFO    Thread-7  :10284 [run_manager.py:_on_file_modified():692] file/dir modified: F:\CompSci\project\Code\MIDI\wandb\run-20200417_103153-1mi4l87p\output.log
+2020-04-17 13:31:58,733 INFO    Thread-7  :10284 [run_manager.py:_on_file_created():681] file/dir created: F:\CompSci\project\Code\MIDI\wandb\run-20200417_103153-1mi4l87p\wandb-events.jsonl
+2020-04-17 13:31:59,144 INFO    MainThread:10284 [run_manager.py:shutdown():1084] stopping streaming files and file change observer
+2020-04-17 13:31:59,732 INFO    Thread-7  :10284 [run_manager.py:_on_file_modified():692] file/dir modified: F:\CompSci\project\Code\MIDI\wandb\run-20200417_103153-1mi4l87p\wandb-metadata.json
+2020-04-17 13:32:01,909 INFO    MainThread:10284 [run_manager.py:_sync_etc():1393] process only ran for 9 seconds, not syncing files
+change observer
+2020-04-17 13:31:59,732 INFO    Thread-7  :10284 [1mi4l87p:run_manager.py:_on_file_modified():692] file/dir modified: F:\CompSci\project\Code\MIDI\wandb\run-20200417_103153-1mi4l87p\wandb-metadata.json
+2020-04-17 13:32:01,909 INFO    MainThread:10284 [1mi4l87p:run_manager.py:_sync_etc():1393] process only ran for 9 seconds, not syncing files
