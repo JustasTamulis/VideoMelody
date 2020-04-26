@@ -20,6 +20,7 @@ def playMidiFile(midi_stream):
 
 folder_name = "F:\\CompSci\\project\\Data\\Koyaanisqatsi\\midi\\"
 alltime = 0
+altall = 0
 for i in range(1,8):
     midi_name = str(i)+'.mid'
     midi_path = folder_name + midi_name
@@ -38,6 +39,10 @@ for i in range(1,8):
     pm = pretty_midi.PrettyMIDI(midi_path)
     print('original pretty midi end time ' + str(pm.get_end_time()))
     alltime = alltime + pm.get_end_time()
+
+    alt = max(max(n.end for n in i.notes) for i in pm.instruments)
+    print("alternative end:              " + str(alt))
+    altall = altall + alt
     #
     # # Let's look at what's in this MIDI file
     # print('There are {} time signature changes'.format(len(pm.time_signature_changes)))
@@ -53,3 +58,4 @@ for i in range(1,8):
     memFile.seek(0)
     playMidiFile(memFile)
 print(alltime)
+print(altall)
