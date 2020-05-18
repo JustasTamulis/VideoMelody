@@ -1,0 +1,10 @@
+tensorflow
+numpy
+scipy
+matplotlib
+moviepy
+pypianoroll
+pygame
+pretty_midi
+wandb
+seaborn
