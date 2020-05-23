@@ -10,7 +10,7 @@ import numpy as np
 
 class ConvAutoEncoder:
 
-    def __init__(self, input_shape, output_dim, filters=[32, 48, 64],
+    def __init__(self, input_shape, output_dim, filters=[32, 64, 128],
                  kernel=(3,3), stride=(1,1), strideundo=2, pool=(2,2),
                  optimizer="adamax", lossfn="mse"):
         # For now, assuming input_shape is mxnxc, and m,n are multiples of 2.
@@ -24,17 +24,19 @@ class ConvAutoEncoder:
         for i in range(len(filters)):
             self.encoder.add(keras.layers.Conv2D(filters=filters[i], kernel_size=kernel, strides=stride, activation='elu', padding='same'))
             self.encoder.add(keras.layers.MaxPooling2D(pool_size=pool))
+            self.encoder.add(keras.layers.BatchNormalization())
         self.encoder.add(keras.layers.Flatten())
-        self.encoder.add(keras.layers.Dense(output_dim))
+        self.encoder.add(keras.layers.Dense(output_dim, activation='sigmoid'))
 
         # define decoder architecture
         self.decoder = keras.models.Sequential()
         self.decoder.add(keras.layers.InputLayer((output_dim,)))
-        self.decoder.add(keras.layers.Dense(filters[len(filters)-1] * int(input_shape[0]/(2**(len(filters)))) * int(input_shape[1]/(2**(len(filters))))))
+        self.decoder.add(keras.layers.Dense(filters[len(filters)-1] * int(input_shape[0]/(2**(len(filters)))) * int(input_shape[1]/(2**(len(filters)))), activation='elu'))
         self.decoder.add(keras.layers.Reshape((int(input_shape[0]/(2**(len(filters)))),int(input_shape[1]/(2**(len(filters)))), filters[len(filters)-1])))
         for i in range(1,len(filters)):
             self.decoder.add(keras.layers.Conv2DTranspose(filters=filters[len(filters)-i], kernel_size=kernel, strides=strideundo, activation='elu', padding='same'))
-        self.decoder.add(    keras.layers.Conv2DTranspose(filters=input_shape[2],          kernel_size=kernel, strides=strideundo, activation=None,  padding='same'))
+            self.decoder.add(keras.layers.BatchNormalization())
+        self.decoder.add(    keras.layers.Conv2DTranspose(filters=input_shape[2],          kernel_size=kernel, strides=strideundo, activation='sigmoid',  padding='same'))
 
         # compile model
         input         = keras.layers.Input(input_shape)
@@ -51,8 +53,8 @@ class ConvAutoEncoder:
 
     def fit(self, train, test, epochs=25, callbacks=[keras.callbacks.BaseLogger()]):
 
-        self.ae.fit(x=train, y=train, epochs=epochs, validation_data=[test, test],
-                    callbacks=callbacks)
+        self.ae.fit(x=train, y=train, epochs=epochs, validation_data=[test, test])
+                    # callbacks=callbacks)
 
         self.mse = self.ae.evaluate(test, test)
         print('CAE MSE on validation data: ', self.mse)

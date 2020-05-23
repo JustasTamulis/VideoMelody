@@ -4,65 +4,111 @@ import cv2
 import os
 import psutil
 import pickle
+import random
 
 
 
 class feeder:
-    def __init__(self, sample_size = 1000, num_video_vec = 100, valid_size = 300):
+    def __init__(self, model_nr, sample_size = 1000, valid_size = 1):
 
+        if sample_size > 14000:
+            sample_size = 140000
+
+        if valid_size > 140:
+            valid_size = 140
+
+        self.model_nr = model_nr
         self.valid_size = valid_size
         self.sample_size = sample_size
-        self.sequence_length = num_video_vec
 
-        self.folder_name = "F:\\CompSci\\project\\Data\\Koyaanisqatsi\\"
-        hot2piano_path = self.folder_name + "OneHot\\hot2piano.npy"
-        piano2hot_path = self.folder_name + "OneHot\\piano2hot.pkl"
-
-        self.hot2piano = np.load(hot2piano_path)
-        with open(piano2hot_path, 'rb') as handle:
-            self.piano2hot = pickle.load(handle)
+        # folder_name = "F:\\CompSci\\project\\Data\\Koyaanisqatsi\\"
+        folder_name = "C:\\VideoMelody\\"
+        self.train_folder = folder_name + "train\\"
+        self.test_folder = folder_name + "test\\"
 
 
-    def gen_input(self):
+    def get_validation(self):
+        valid_nr = np.random.randint(0, 140, self.valid_size)
+        SV = []
+        P = []
+        SP = []
+        SPt = []
+        SRV = []
 
-        allohe = None
-        for i in range(1,2):
-            ohe_path = self.folder_name + "OneHot\\" + str(i) + '.npy'
-            vec_path = self.folder_name + "img_vec\\" + str(i) + '.npy'
-            vide_path = self.folder_name + "video_npy\\" + str(i) + '.npy'
-            ohe = np.load(ohe_path)
-            vec = np.load(vec_path)
-            vid = np.load(vide_path)
-            pianoroll_size = 2502
-            if self.sample_size > len(ohe):
-                self.sample_size = len(ohe)
-            print(ohe.shape)
-            vid_input = []
-            note_input = []
-            # create input sequences and the corresponding outputs
-            for i in range(0, self.sample_size - self.sequence_length):
-                vid_in = vec[i:i + self.sequence_length]
-                note_nr = ohe[i + self.sequence_length]
-                note_in = np.zeros(pianoroll_size)
-                note_in[note_nr] = 1
-                vid_input.append(vid_in)
-                note_input.append(note_in)
+        if self.valid_size > 80:
+            SV = np.load(self.test_folder + "SV\\all" + '.npy')
+            P = np.load(self.test_folder + "P\\all" + '.npy')
+            SP = np.load(self.test_folder + "SP\\all" + '.npy')
+            SPt = np.load(self.test_folder + "SPt\\all" + '.npy')
+            SRV = np.load(self.test_folder + "SRV\\all" + '.npy')
+        else:
+            SV = np.zeros((self.valid_size, 50, 100), dtype=np.float32)
+            P = np.zeros((self.valid_size, 1, 2502), dtype=np.uint8)
+            SP = np.zeros((self.valid_size, 50, 2502), dtype=np.uint8)
+            SPt = np.zeros((self.valid_size, 50, 2502), dtype=np.uint8)
+            SRV = np.zeros((self.valid_size, 50, 120, 120, 3), dtype=np.float32)
 
-            vid_input = np.reshape(vid_input,(self.sample_size - self.sequence_length,  self.sequence_length, 100))
-            note_input = np.reshape(note_input, (self.sample_size - self.sequence_length, 2502))
+            for j in range(self.valid_size):
+                i = valid_nr[j]
+                sv = np.load(self.test_folder + "SV\\" + str(i) + '.npy')
+                p = np.load(self.test_folder + "P\\" + str(i) + '.npy')
+                sp = np.load(self.test_folder + "SP\\" + str(i) + '.npy')
+                spt = np.load(self.test_folder + "SPt\\" + str(i) + '.npy')
+                srv = np.load(self.test_folder + "SRV\\" + str(i) + '.npy')
+                SV[j] = sv
+                P[j] = p
+                SP[j] = sp
+                SPt[j] = spt
+                SRV[j] = srv
 
-            val_vid_input = []
-            val_vid_real = []
-            # create input sequences and the corresponding outputs
-            for i in range(self.sample_size - self.sequence_length, self.sample_size - self.sequence_length + self.valid_size):
-                vid_in = vec[i:i + self.sequence_length]
-                rl_in = vid[i + self.sequence_length]
-                val_vid_input.append(vid_in)
-                val_vid_real.append(rl_in)
+            SV = np.array(SV, dtype = np.float32)
+            P = np.array(P, dtype = np.int8)
+            SP = np.array(SP, dtype = np.int8)
+            SPt = np.array(SPt, dtype = np.int8)
+            SRV = np.array(SRV, dtype = np.float32)
 
-            val_vid_input = np.reshape(val_vid_input,(self.valid_size,  self.sequence_length, 100))
-            val_vid_real = np.reshape(val_vid_real, (self.valid_size, 120,120,3))
+        # np.save(self.test_folder + "SV\\all" + '.npy', SV)
+        # np.save(self.test_folder + "P\\all" + '.npy', P)
+        # np.save(self.test_folder + "SP\\all" + '.npy', SP)
+        # np.save(self.test_folder + "SPt\\all" + '.npy', SPt)
+        # np.save(self.test_folder + "SRV\\all" + '.npy', SRV)
+
+        return SV, P, SP, SPt, SRV
 
 
+    def get_input(self):
 
-            return vid_input, note_input, val_vid_input, val_vid_real
+
+        if self.sample_size > 10000:
+            SV = np.load(self.train_folder + "SV\\all" + '.npy')
+            P = np.load(self.train_folder + "P\\all" + '.npy')
+            SP = np.load(self.train_folder + "SP\\all" + '.npy')
+            SPt = np.load(self.train_folder + "SPt\\all" + '.npy')
+        else:
+            SV = np.zeros((self.sample_size, 50, 100), dtype=np.float32)
+            P = np.zeros((self.sample_size, 1, 2502), dtype=np.uint8)
+            SP = np.zeros((self.sample_size, 50, 2502), dtype=np.uint8)
+            SPt = np.zeros((self.sample_size, 50, 2502), dtype=np.uint8)
+            valid_nr = np.random.randint(0, 14000, self.sample_size)
+            for j in range(self.sample_size):
+                i = valid_nr[j]
+                sv = np.load(self.train_folder + "SV\\" + str(i) + '.npy')
+                p = np.load(self.train_folder + "P\\" + str(i) + '.npy')
+                sp = np.load(self.train_folder + "SP\\" + str(i) + '.npy')
+                spt = np.load(self.train_folder + "SPt\\" + str(i) + '.npy')
+                SV[j] = sv
+                P[j] = p
+                SP[j] = sp
+                SPt[j] = spt
+
+            SV = np.array(SV, dtype = np.float32)
+            P = np.array(P, dtype = np.int8)
+            SP = np.array(SP, dtype = np.int8)
+            SPt = np.array(SPt, dtype = np.int8)
+
+        # np.save(self.train_folder + "SV\\all" + '.npy', SV)
+        # np.save(self.train_folder + "P\\all" + '.npy', P)
+        # np.save(self.train_folder + "SP\\all" + '.npy', SP)
+        # np.save(self.train_folder + "SPt\\all" + '.npy', SPt)
+
+        return SV, P, SP, SPt

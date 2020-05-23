@@ -6,3 +6,5 @@ moviepy
 pypianoroll
 pygame
 pretty_midi
+wandb
+seaborn

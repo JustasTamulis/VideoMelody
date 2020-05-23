@@ -42,70 +42,75 @@ def plot_many(images, n=[2,6]):
             plt.axis('off')
     plt.show()
 
-folder_name = "F:\\CompSci\\project\\Data\\Koyatsiqatsi\\"
+folder_name = "F:\\CompSci\\project\\Data\\Koyaanisqatsi\\"
 checkpoint_dir = folder_name + "checkpoints3\\"
 avi_name = 'Koyaanisqatsi.120p.avi'
 image_name = 'Koyaanisqatsi.npy'
 avi_path = folder_name + avi_name
 image_path = folder_name + image_name
 
-
-folder_name2 = "F:\\CompSci\\project\\Data\\Piano midi\\"
-image_name2 = 'image_ndarray.npy'
-image_path2 = folder_name2 + image_name2
-
 cae = ConvAutoEncoder(input_shape=(120,120,3), output_dim=100)
 # cae.load_weights(prefix = "last2_")
 
 # video = getVideo(avi_path)
-video = np.load(image_path2)
+video = np.load(image_path)
 np.random.shuffle(video)
-# print(process.memory_info().rss / 1000000)  # in megabytes
 # plot_many(video)
 FRAMES = video.shape[0]
 IMG_HEIGHT = 120
 IMG_WIDTH = 120
 # np.save(image_path, video)
 print(FRAMES)
-epochs = 15
-All_train, X_validate, X_test = np.split(video, [int(0.9 * FRAMES), int(0.95 * FRAMES)])
+
+All_train, X_validate, X_test = np.split(video, [int(0.965 * FRAMES), int(0.975 * FRAMES)])
 #
 video = None
-mse = cae.fit(All_train, X_validate, epochs=epochs)
-cae.save_weights(prefix = "viz_")
-# X_test = X_test.astype(np.float32)
-# X_test = X_test / 255
-# X_validate = X_validate.astype(np.float32)
-# X_validate = X_validate / 255
-# # print(process.memory_info().rss / 1000000)  # in megabytes
-#
-# train_size = 0.025
-# j = 0
-# for i in np.arange(train_size, 0.94, train_size):
-#     X_train,  All_train = np.split(All_train, [int(train_size * FRAMES)])
-#     X_train = X_train.astype(np.float32)
-#     X_train = X_train / 255
-#     mse = cae.fit(X_train, X_validate, epochs=epochs)
-#     j = j + 1
-#     # cae.save_weights(prefix = str(j) + "_" + str(round(mse,4)) + "_")
-#     print(j)
-#     cae.save_weights(prefix = "last3_")
+cae.load_weights(prefix = "last_")
 
+
+X_validate = X_validate.astype(np.float32)
+X_validate = X_validate / 255
+
+
+# print(X_test.shape)
+# print(X_validate.shape)
+# print(All_train.shape)
+
+epochs = 1
+train_size = int(len(All_train)/25)
+j = 0
+for i in np.arange(0, len(All_train) - train_size, train_size):
+    X_train,  All_train = np.split(All_train, [train_size])
+    # X_train = All_train[i:i+train_size]
+    X_train = X_train.astype(np.float32)
+    X_train = X_train / 255
+    mse = cae.fit(X_train, X_validate, epochs=epochs)
+    j = j + 1
+    cae.save_weights(prefix = str(j) + "_" + str(round(mse,4)) + "_")
+    print(j)
+    cae.save_weights(prefix = "last_")
+
+All_train = None
+cae.save_weights(prefix = "new_")
 # Test
-test_codes = cae.encode(X_test)
-test_reconstructed = cae.decode(test_codes)
-
-plot_many_vs_reconstructed(X_test, test_reconstructed, n = 4)
-
-
-
-video = np.load(image_path)
-FRAMES = video.shape[0]
-All_train, X_validate, X_test = np.split(video, [int(0.99 * FRAMES), int(0.995 * FRAMES)])
-#
 X_test = X_test.astype(np.float32)
 X_test = X_test / 255
 test_codes = cae.encode(X_test)
+print(np.max(test_codes))
 test_reconstructed = cae.decode(test_codes)
 
-plot_many_vs_reconstructed(X_test, test_reconstructed, n = 4)
+plot_many_vs_reconstructed(X_test, test_reconstructed, n = 8)
+plot_many_vs_reconstructed(X_test, test_reconstructed, n = 8)
+plot_many_vs_reconstructed(X_test, test_reconstructed, n = 8)
+
+
+# video = np.load(image_path)
+# FRAMES = video.shape[0]
+# All_train, X_validate, X_test = np.split(video, [int(0.99 * FRAMES), int(0.995 * FRAMES)])
+# #
+# X_test = X_test.astype(np.float32)
+# X_test = X_test / 255
+# test_codes = cae.encode(X_test)
+# test_reconstructed = cae.decode(test_codes)
+#
+# plot_many_vs_reconstructed(X_test, test_reconstructed, n = 4)
