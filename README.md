@@ -1,3 +1,9 @@
+Unique melody generation tool for outdoor videos.
+
+To be improved.
+
+
+
 # VideoMelody
 
 To install requirements run:
